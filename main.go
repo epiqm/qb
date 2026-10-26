@@ -13,6 +13,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -21,6 +22,9 @@ import (
 	"qb/pre"
 	"qb/qscript"
 )
+
+// version is set by release builds: go build -ldflags "-X main.version=v1.0.0"
+var version = "dev"
 
 type args struct {
 	input, output, names string
@@ -48,6 +52,7 @@ func usage() {
 	for _, c := range commands {
 		fmt.Fprintf(os.Stderr, "  %-10s %s\n", c.name, c.desc)
 	}
+	fmt.Fprintf(os.Stderr, "  %-10s %s\n", "version", "Print the version")
 	fmt.Fprintf(os.Stderr, "\nRun 'qb <command>' for its arguments.\n")
 	fmt.Fprintf(os.Stderr, "\nqb by epicmaxim, www.thug.one\n")
 }
@@ -71,6 +76,11 @@ func main() {
 	if len(os.Args) < 2 {
 		usage()
 		os.Exit(2)
+	}
+	switch os.Args[1] {
+	case "version", "-version", "--version":
+		fmt.Printf("qb %s (%s/%s)\n", version, runtime.GOOS, runtime.GOARCH)
+		return
 	}
 	var cmd *command
 	for i := range commands {
